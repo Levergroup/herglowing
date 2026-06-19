@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GLP-1 Readiness Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  #glpq-wrap, #glpq-wrap * { box-sizing: border-box; }
+  #glpq-wrap {
+    font-family: 'DM Sans', sans-serif;
+    background: #FFFAF5;
+    padding: 24px 12px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+  .glpq-card {
+    background: #FFFFFF;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    overflow: hidden;
+    position: relative;
+  }
+  .glpq-inner {
+    padding: 24px 20px;
+  }
+  .glpq-step { display: none; opacity: 0; transition: opacity 0.2s ease; }
+  .glpq-step.glpq-active { display: block; opacity: 1; }
+  .glpq-step.glpq-fading { opacity: 0; }
+
+  /* Intro */
+  .glpq-logo-row { text-align: center; }
+  .glpq-logo { color: #FA2E7D; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; }
+  .glpq-accent-line { width: 60px; height: 3px; background: #FBD671; margin: 8px auto 16px; border-radius: 2px; }
+  .glpq-badge {
+    display: block; width: fit-content; margin: 0 auto 16px;
+    background: #FFF8E1; color: #7A3800; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em; padding: 6px 12px; border-radius: 20px;
+  }
+  .glpq-headline {
+    font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700;
+    color: #1A1A1A; line-height: 1.3; text-align: center; max-width: 420px; margin: 0 auto 14px;
+  }
+  .glpq-subtext {
+    font-size: 14px; color: #555555; text-align: center; line-height: 1.65;
+    max-width: 400px; margin: 0 auto 20px;
+  }
+  .glpq-bullets { margin-bottom: 16px; }
+  .glpq-bullet { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+  .glpq-check-circle {
+    width: 16px; height: 16px; min-width: 16px; border-radius: 50%; background: #1B5E3B;
+    display: flex; align-items: center; justify-content: center; margin-top: 1px;
+  }
+  .glpq-bullet-text { font-size: 13px; color: #555555; line-height: 1.5; }
+  .glpq-stats-row { display: flex; gap: 10px; margin-bottom: 20px; }
+  .glpq-stat-card { flex: 1; background: #F7F7F5; border-radius: 8px; padding: 12px; text-align: center; }
+  .glpq-stat-num { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: #FA2E7D; }
+  .glpq-stat-label { font-size: 11px; color: #888888; margin-top: 4px; line-height: 1.4; }
+  .glpq-cta-btn {
+    width: 100%; height: 50px; background: #FA2E7D; color: #fff; font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; transition: background 0.2s;
+  }
+  .glpq-cta-btn:hover { background: #D4246A; }
+  .glpq-footnote { font-size: 11px; color: #888888; text-align: center; margin-top: 10px; }
+
+  /* Progress bar */
+  .glpq-progress-wrap { padding: 18px 20px 0; }
+  .glpq-progress-labels { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .glpq-progress-label-left { font-size: 11px; font-weight: 600; color: #1A1A1A; }
+  .glpq-progress-label-right { font-size: 11px; color: #888888; }
+  .glpq-progress-track { background: #F0F0F0; border-radius: 6px; height: 6px; overflow: hidden; }
+  .glpq-progress-fill { background: #FA2E7D; height: 100%; border-radius: 6px; transition: width 0.3s ease; width: 0%; }
+
+  /* Questions */
+  .glpq-q-text { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: #1A1A1A; line-height: 1.4; margin-bottom: 8px; }
+  .glpq-q-sub { font-size: 13px; color: #555555; font-style: italic; margin-bottom: 18px; }
+  .glpq-option {
+    width: 100%; background: #fff; border: 1px solid #E0E0E0; border-radius: 8px;
+    padding: 14px 16px; margin-bottom: 10px; text-align: left; cursor: pointer;
+    display: flex; align-items: center; gap: 12px; transition: border-color 0.15s, background 0.15s;
+    min-height: 48px; font-family: 'DM Sans', sans-serif;
+  }
+  .glpq-option:hover { border-color: #FA2E7D; background: #FFF0F6; }
+  .glpq-option.glpq-selected { border-color: #FA2E7D; background: #FFF0F6; }
+  .glpq-option-circle {
+    width: 20px; height: 20px; min-width: 20px; border-radius: 50%; border: 1.5px solid #ccc;
+    background: #fff; display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+  }
+  .glpq-option.glpq-selected .glpq-option-circle { background: #FA2E7D; border-color: #FA2E7D; }
+  .glpq-option-text { font-size: 14px; color: #1A1A1A; line-height: 1.4; }
+  .glpq-callout {
+    background: #EAF3DE; border-left: 3px solid #1B5E3B; border-radius: 0 8px 8px 0;
+    padding: 10px 14px; font-size: 12px; color: #1A3D2B; margin: 6px 0 18px; line-height: 1.5;
+  }
+  .glpq-next-btn {
+    width: 100%; height: 48px; background: #FA2E7D; color: #fff; font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 600; border-radius: 8px; border: none; opacity: 0.35; cursor: not-allowed;
+    transition: background 0.2s, opacity 0.2s; margin-top: 4px;
+  }
+  .glpq-next-btn.glpq-enabled { opacity: 1; cursor: pointer; }
+  .glpq-next-btn.glpq-enabled:hover { background: #D4246A; }
+
+  /* Results */
+  .glpq-alert-strip {
+    width: 100%; background: #FFF8E1; padding: 10px 16px; display: flex; align-items: center; gap: 8px;
+  }
+  .glpq-pulse-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #FBD671;
+    animation: glpq-pulse 1.5s infinite alternate;
+  }
+  @keyframes glpq-pulse { from { opacity: 1; } to { opacity: 0.3; } }
+  .glpq-alert-text { font-size: 12px; font-weight: 500; color: #7A5500; }
+
+  .glpq-score-block { padding: 20px 20px 0 20px; display: flex; align-items: baseline; gap: 10px; }
+  .glpq-score-num { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 800; color: #FA2E7D; line-height: 1; }
+  .glpq-score-lines { display: flex; flex-direction: column; }
+  .glpq-score-line1 { font-size: 13px; font-weight: 500; color: #1A1A1A; }
+  .glpq-score-line2 { font-size: 13px; color: #888888; }
+  .glpq-divider { border: none; border-top: 1px solid #F0F0F0; margin-top: 16px; }
+
+  .glpq-result-headline-block { padding: 16px 20px 0 20px; }
+  .glpq-result-headline { font-size: 16px; font-weight: 600; color: #1A1A1A; line-height: 1.4; margin-bottom: 8px; }
+  .glpq-result-copy { font-size: 13px; color: #555555; line-height: 1.7; margin-bottom: 0; }
+
+  .glpq-vsl-block { margin-top: 16px; }
+  .glpq-vsl-link { display: block; text-decoration: none; }
+  .glpq-vsl-gradient {
+    background: linear-gradient(135deg, #0D1F15, #1B5E3B); height: 180px; width: 100%; position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  }
+  .glpq-vsl-badge {
+    position: absolute; top: 10px; left: 10px; background: #FA2E7D; color: #fff; font-size: 10px;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 9px; border-radius: 4px;
+  }
+  .glpq-play-btn {
+    width: 56px; height: 56px; background: rgba(251,214,113,0.95); border-radius: 50%;
+    box-shadow: 0 0 0 10px rgba(251,214,113,0.2); display: flex; align-items: center; justify-content: center;
+  }
+  .glpq-vsl-text { color: #fff; font-size: 13px; font-weight: 500; opacity: 0.9; text-align: center; padding: 0 20px; }
+
+  .glpq-result-body { padding: 16px 20px 8px 20px; }
+  .glpq-insight { display: flex; gap: 8px; margin-bottom: 8px; }
+  .glpq-insight-dot { width: 6px; height: 6px; min-width: 6px; border-radius: 50%; background: #FA2E7D; margin-top: 6px; flex-shrink: 0; }
+  .glpq-insight-text { font-size: 13px; color: #1A1A1A; line-height: 1.5; }
+
+  .glpq-result-cta {
+    width: 100%; height: 52px; background: #FA2E7D; border-radius: 8px; border: none; color: #fff;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 4px;
+    text-decoration: none; transition: background 0.2s;
+  }
+  .glpq-result-cta:hover { background: #D4246A; }
+  .glpq-arrow-circle {
+    width: 22px; height: 22px; background: #FBD671; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .glpq-trust-line { text-align: center; font-size: 11px; color: #AAAAAA; margin-top: 8px; }
+  .glpq-disclaimer { text-align: center; font-size: 10px; color: #CCCCCC; margin-top: 6px; line-height: 1.5; padding-bottom: 16px; }
+
+  @media (max-width: 400px) {
+    .glpq-score-num { font-size: 44px; }
+  }
+</style>
+</head>
+<body>
+<div id="glpq-wrap">
+  <div class="glpq-card">
+
+    <!-- Progress bar (Steps 1-4) -->
+    <div class="glpq-progress-wrap" id="glpq-progress-wrap" style="display:none;">
+      <div class="glpq-progress-labels">
+        <span class="glpq-progress-label-left">GLP-1 Readiness Assessment</span>
+        <span class="glpq-progress-label-right" id="glpq-progress-text">Question 1 of 4</span>
+      </div>
+      <div class="glpq-progress-track">
+        <div class="glpq-progress-fill" id="glpq-progress-fill"></div>
+      </div>
+    </div>
+
+    <div class="glpq-inner" id="glpq-scroll-target">
+
+      <!-- STEP 0: INTRO -->
+      <div class="glpq-step glpq-active" data-step="0">
+        <div class="glpq-logo-row">
+          <div class="glpq-logo">HERGLOWING</div>
+          <div class="glpq-accent-line"></div>
+        </div>
+        <span class="glpq-badge">FREE 60-SECOND ASSESSMENT</span>
+        <h1 class="glpq-headline">Could You Qualify for Doctor-Prescribed GLP-1 Medication?</h1>
+        <p class="glpq-subtext">Answer 4 questions to find out if you're a candidate — and how women just like you are getting GLP-1 prescribed online for under $200/month without insurance.</p>
+
+        <div class="glpq-bullets">
+          <div class="glpq-bullet">
+            <div class="glpq-check-circle">
+              <svg width="9" height="9" viewBox="0 0 16 16" fill="none"><path d="M2 8.5L6 12.5L14 3.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="glpq-bullet-text">Takes 60 seconds — no email required</div>
+          </div>
+          <div class="glpq-bullet">
+            <div class="glpq-check-circle">
+              <svg width="9" height="9" viewBox="0 0 16 16" fill="none"><path d="M2 8.5L6 12.5L14 3.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="glpq-bullet-text">Based on actual FDA eligibility criteria</div>
+          </div>
+          <div class="glpq-bullet">
+            <div class="glpq-check-circle">
+              <svg width="9" height="9" viewBox="0 0 16 16" fill="none"><path d="M2 8.5L6 12.5L14 3.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="glpq-bullet-text">Used by 18,000+ women in our community</div>
+          </div>
+        </div>
+
+        <div class="glpq-stats-row">
+          <div class="glpq-stat-card">
+            <div class="glpq-stat-num">15%</div>
+            <div class="glpq-stat-label">Average body weight lost in clinical trials</div>
+          </div>
+          <div class="glpq-stat-card">
+            <div class="glpq-stat-num">24 hrs</div>
+            <div class="glpq-stat-label">Typical prescription approval time</div>
+          </div>
+        </div>
+
+        <button class="glpq-cta-btn" id="glpq-start-btn">Find Out If I Qualify →</button>
+        <p class="glpq-footnote">Free assessment · No commitment · Results shown instantly</p>
+      </div>
+
+      <!-- STEP 1: Q1 -->
+      <div class="glpq-step" data-step="1">
+        <h2 class="glpq-q-text">When you catch a glimpse of yourself in a mirror or a shop window — what's your first instinct?</h2>
+        <p class="glpq-q-sub">Be honest — this helps us personalize your results.</p>
+        <div class="glpq-options" data-question="1">
+          <button class="glpq-option" data-value="a"><span class="glpq-option-circle"></span><span class="glpq-option-text">I look away quickly — I don't love what I see right now</span></button>
+          <button class="glpq-option" data-value="b"><span class="glpq-option-circle"></span><span class="glpq-option-text">I stop and feel a wave of frustration — I'm trying so hard</span></button>
+          <button class="glpq-option" data-value="c"><span class="glpq-option-circle"></span><span class="glpq-option-text">I barely recognize myself from a few years ago</span></button>
+          <button class="glpq-option" data-value="d"><span class="glpq-option-circle"></span><span class="glpq-option-text">I feel disconnected from my body — like it's not cooperating</span></button>
+        </div>
+        <button class="glpq-next-btn" data-next-for="1">Next Question →</button>
+      </div>
+
+      <!-- STEP 2: Q2 -->
+      <div class="glpq-step" data-step="2">
+        <h2 class="glpq-q-text">Has a doctor, nurse, or health screening ever flagged any of these for you?</h2>
+        <p class="glpq-q-sub">Check the one that applies most — or the most recent.</p>
+        <div class="glpq-options" data-question="2">
+          <button class="glpq-option" data-value="a"><span class="glpq-option-circle"></span><span class="glpq-option-text">Yes — high blood pressure or cholesterol</span></button>
+          <button class="glpq-option" data-value="b"><span class="glpq-option-circle"></span><span class="glpq-option-text">Yes — blood sugar, prediabetes, or insulin resistance</span></button>
+          <button class="glpq-option" data-value="c"><span class="glpq-option-circle"></span><span class="glpq-option-text">Yes — my BMI or weight has been mentioned</span></button>
+          <button class="glpq-option" data-value="d"><span class="glpq-option-circle"></span><span class="glpq-option-text">Not that I can recall — nothing has been flagged</span></button>
+        </div>
+        <div class="glpq-callout">✓ Any of the first three options may indicate GLP-1 eligibility under current FDA guidelines — even without a diabetes diagnosis.</div>
+        <button class="glpq-next-btn" data-next-for="2">Next Question →</button>
+      </div>
+
+      <!-- STEP 3: Q3 -->
+      <div class="glpq-step" data-step="3">
+        <h2 class="glpq-q-text">How long have you been struggling with your weight despite genuinely trying?</h2>
+        <p class="glpq-q-sub">This helps us understand your situation — not judge it.</p>
+        <div class="glpq-options" data-question="3">
+          <button class="glpq-option" data-value="a"><span class="glpq-option-circle"></span><span class="glpq-option-text">Less than a year — it's a recent change</span></button>
+          <button class="glpq-option" data-value="b"><span class="glpq-option-circle"></span><span class="glpq-option-text">1 to 3 years — it's been a frustrating stretch</span></button>
+          <button class="glpq-option" data-value="c"><span class="glpq-option-circle"></span><span class="glpq-option-text">3 to 5 years — I've tried a lot of different things</span></button>
+          <button class="glpq-option" data-value="d"><span class="glpq-option-circle"></span><span class="glpq-option-text">More than 5 years — I've basically stopped counting</span></button>
+        </div>
+        <button class="glpq-next-btn" data-next-for="3">Next Question →</button>
+      </div>
+
+      <!-- STEP 4: Q4 -->
+      <div class="glpq-step" data-step="4">
+        <h2 class="glpq-q-text">If a licensed doctor could review your profile online — and tell you whether you qualify for GLP-1 medication — would you want to find out?</h2>
+        <p class="glpq-q-sub">This is how we personalize your results on the next screen.</p>
+        <div class="glpq-options" data-question="4">
+          <button class="glpq-option" data-value="a"><span class="glpq-option-circle"></span><span class="glpq-option-text">Yes — I want to know right now</span></button>
+          <button class="glpq-option" data-value="b"><span class="glpq-option-circle"></span><span class="glpq-option-text">Definitely — I've been looking for an affordable option</span></button>
+          <button class="glpq-option" data-value="c"><span class="glpq-option-circle"></span><span class="glpq-option-text">Maybe — I want more information first</span></button>
+          <button class="glpq-option" data-value="d"><span class="glpq-option-circle"></span><span class="glpq-option-text">I'm open to it — I'll see what the results say</span></button>
+        </div>
+        <button class="glpq-next-btn" data-next-for="4">See My Results →</button>
+      </div>
+
+      <!-- STEP 5: RESULTS -->
+      <div class="glpq-step" data-step="5" id="glpq-results-step">
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var currentStep = 0;
+  var answers = { 1: null, 2: null, 3: null, 4: null };
+  var totalQuestions = 4;
+
+  var wrap = document.getElementById('glpq-wrap');
+  var progressWrap = document.getElementById('glpq-progress-wrap');
+  var progressFill = document.getElementById('glpq-progress-fill');
+  var progressText = document.getElementById('glpq-progress-text');
+  var scrollTarget = document.getElementById('glpq-scroll-target');
+  var resultsStep = document.getElementById('glpq-results-step');
+
+  var resultsHTML = ''
+    + '<div class="glpq-alert-strip">'
+    +   '<div class="glpq-pulse-dot"></div>'
+    +   '<span class="glpq-alert-text">Your personalized results are ready</span>'
+    + '</div>'
+    + '<div class="glpq-score-block">'
+    +   '<div class="glpq-score-num">87%</div>'
+    +   '<div class="glpq-score-lines">'
+    +     '<span class="glpq-score-line1">of women with your profile</span>'
+    +     '<span class="glpq-score-line2">are strong GLP-1 candidates</span>'
+    +   '</div>'
+    + '</div>'
+    + '<hr class="glpq-divider" style="margin-left:20px;margin-right:20px;">'
+    + '<div class="glpq-result-headline-block">'
+    +   '<div class="glpq-result-headline">Your answers suggest you may be a strong candidate for doctor-prescribed GLP-1 treatment.</div>'
+    +   '<p class="glpq-result-copy">Based on what you shared — the frustration, the timeline, and the health signals — this matches the profile of women who are successfully getting GLP-1 prescribed through telehealth. The good news: you don\'t need insurance, and approval typically happens within 24 hours.</p>'
+    + '</div>'
+    + '<div class="glpq-vsl-block">'
+    +   '<a class="glpq-vsl-link" href="CLINIC_SECRET_AFFILIATE_LINK">'
+    +     '<div class="glpq-vsl-gradient">'
+    +       '<span class="glpq-vsl-badge">RECOMMENDED FOR YOU</span>'
+    +       '<div class="glpq-play-btn">'
+    +         '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="margin-left:2px;"><path d="M2 1.5L16 9L2 16.5V1.5Z" fill="white"/></svg>'
+    +       '</div>'
+    +       '<span class="glpq-vsl-text">See How Women Are Getting GLP-1 Prescribed Online</span>'
+    +     '</div>'
+    +   '</a>'
+    + '</div>'
+    + '<div class="glpq-result-body">'
+    +   '<div class="glpq-insight"><span class="glpq-insight-dot"></span><span class="glpq-insight-text">Same active ingredient as Ozempic® and Wegovy® — prescribed by a licensed U.S. doctor</span></div>'
+    +   '<div class="glpq-insight"><span class="glpq-insight-dot"></span><span class="glpq-insight-text">No insurance required — starting from under $200/month</span></div>'
+    +   '<div class="glpq-insight"><span class="glpq-insight-dot"></span><span class="glpq-insight-text">Prescription typically approved within 24 hours of your online assessment</span></div>'
+    +   '<a class="glpq-result-cta" href="CLINIC_SECRET_AFFILIATE_LINK">'
+    +     '<span>See If I Qualify — Free Assessment</span>'
+    +     '<span class="glpq-arrow-circle"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="#1A1A1A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
+    +   '</a>'
+    +   '<p class="glpq-trust-line">Free to find out · No obligation · Takes 2 minutes</p>'
+    +   '<p class="glpq-disclaimer">* HerGlowing may earn a commission. This is not medical advice. Results shown are for informational purposes only. Always consult a qualified healthcare provider.</p>'
+    + '</div>';
+
+  resultsStep.innerHTML = resultsHTML;
+
+  function updateProgress(step) {
+    if (step >= 1 && step <= 4) {
+      progressWrap.style.display = 'block';
+      var pct = ((step - 1) / totalQuestions) * 100;
+      progressFill.style.width = pct + '%';
+      progressText.textContent = 'Question ' + step + ' of ' + totalQuestions;
+    } else {
+      progressWrap.style.display = 'none';
+    }
+  }
+
+  function scrollToTop() {
+    var rect = wrap.getBoundingClientRect();
+    var targetY = window.pageYOffset + rect.top - 16;
+    window.scrollTo({ top: targetY, behavior: 'smooth' });
+  }
+
+  function goToStep(newStep) {
+    var current = wrap.querySelector('.glpq-step.glpq-active');
+    var next = wrap.querySelector('.glpq-step[data-step="' + newStep + '"]');
+    if (!next) return;
+
+    if (current) {
+      current.classList.add('glpq-fading');
+      setTimeout(function() {
+        current.classList.remove('glpq-active', 'glpq-fading');
+        next.classList.add('glpq-active');
+        updateProgress(newStep);
+        currentStep = newStep;
+        scrollToTop();
+      }, 200);
+    } else {
+      next.classList.add('glpq-active');
+      updateProgress(newStep);
+      currentStep = newStep;
+    }
+  }
+
+  document.getElementById('glpq-start-btn').addEventListener('click', function() {
+    goToStep(1);
+  });
+
+  wrap.querySelectorAll('.glpq-options').forEach(function(group) {
+    var qNum = group.getAttribute('data-question');
+    group.querySelectorAll('.glpq-option').forEach(function(opt) {
+      opt.addEventListener('click', function() {
+        group.querySelectorAll('.glpq-option').forEach(function(o) {
+          o.classList.remove('glpq-selected');
+        });
+        opt.classList.add('glpq-selected');
+        answers[qNum] = opt.getAttribute('data-value');
+
+        var nextBtn = wrap.querySelector('.glpq-next-btn[data-next-for="' + qNum + '"]');
+        if (nextBtn) {
+          nextBtn.classList.add('glpq-enabled');
+        }
+      });
+    });
+  });
+
+  wrap.querySelectorAll('.glpq-next-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (!btn.classList.contains('glpq-enabled')) return;
+      var forQ = parseInt(btn.getAttribute('data-next-for'), 10);
+      goToStep(forQ + 1);
+    });
+  });
+})();
+</script>
+</body>
+</html>
